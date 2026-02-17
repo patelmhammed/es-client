@@ -7,33 +7,25 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Minimal ES connection config: only hosts, username, password, socket-timeout.
+ * All other client settings use Elasticsearch client defaults.
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class EsConnectionProperties {
     private List<String> hosts;
-    private Integer connectionRequestTimeout;
-    private Integer connectTimeout;
-    private Boolean authEnabled;
     private String username;
     private String password;
-    private Integer maxConnectionTotal;
-    private Integer maxConnectionPerRoute;
-    private String scheme;
     private Integer socketTimeout;
 
     @Override
     public String toString() {
         return "EsConnectionProperties{" +
                 "hosts=" + hosts +
-                ", connectionRequestTimeout=" + connectionRequestTimeout +
-                ", connectTimeout=" + connectTimeout +
-                ", authEnabled=" + authEnabled +
-                ", username='" + username + '\'' +
-                ", maxConnectionTotal=" + maxConnectionTotal +
-                ", maxConnectionPerRoute=" + maxConnectionPerRoute +
-                ", scheme='" + scheme + '\'' +
+                ", username='" + (username != null ? "***" : null) + '\'' +
                 ", socketTimeout=" + socketTimeout +
                 '}';
     }

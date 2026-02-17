@@ -16,65 +16,53 @@ import org.elasticsearch.client.RestClientBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * ES 9.1 client config: only hosts, username, password, socket-timeout; rest use client defaults.
+ */
 public class EsV91Configuration {
 
-    private static final Integer DEFAULT_MAX_CONNECTION_TOTAL = 30;
-    private static final Integer DEFAULT_MAX_CONNECTION_PER_ROUTE = 10;
+    private static final String DEFAULT_SCHEME = "https";
 
     public static EsV91Client createClient(EsConnectionProperties configs) {
         RestClientBuilder restClientBuilder = getRestClientBuilder(configs);
-
         ElasticsearchTransport transport = new RestClientTransport(
                 restClientBuilder.build(),
                 new JacksonJsonpMapper()
         );
-
         return new EsV91Client(transport);
     }
 
     public static RestClientBuilder getRestClientBuilder(EsConnectionProperties configs) {
         List<String> hosts = configs.getHosts();
         List<HttpHost> httpHosts = new ArrayList<>();
-
+        String scheme = DEFAULT_SCHEME;
         for (String host : hosts) {
             String[] parts = host.split(":");
             String hostname = parts[0];
-            int port = Integer.parseInt(parts[1]);
-            httpHosts.add(new HttpHost(hostname, port, configs.getScheme()));
+            int port = parts.length > 1 ? Integer.parseInt(parts[1]) : 9200;
+            httpHosts.add(new HttpHost(hostname, port, scheme));
         }
 
-        return RestClient.builder(httpHosts.toArray(new HttpHost[0]))
-                .setRequestConfigCallback(
-                        builder ->
-                                builder
-                                        .setConnectTimeout(configs.getConnectTimeout())
-                                        .setSocketTimeout(configs.getSocketTimeout())
-                                        .setConnectionRequestTimeout(configs.getConnectionRequestTimeout()))
-                .setHttpClientConfigCallback(
-                        httpAsyncClientBuilder -> {
-                            httpAsyncClientBuilder
-                                    .setMaxConnTotal(
-                                            Optional.ofNullable(configs.getMaxConnectionTotal())
-                                                    .filter(maxConnTotal -> maxConnTotal > 0)
-                                                    .orElse(DEFAULT_MAX_CONNECTION_TOTAL))
-                                    .setMaxConnPerRoute(
-                                            Optional.ofNullable(configs.getMaxConnectionPerRoute())
-                                                    .filter(maxConnPerRoute -> maxConnPerRoute > 0)
-                                                    .orElse(DEFAULT_MAX_CONNECTION_PER_ROUTE));
-                            setAuthenticatedRestClientBuilder(configs, httpAsyncClientBuilder);
-                            return httpAsyncClientBuilder;
-                        }
-                );
+        RestClientBuilder builder = RestClient.builder(httpHosts.toArray(new HttpHost[0]));
+        if (configs.getSocketTimeout() != null && configs.getSocketTimeout() > 0) {
+            builder.setRequestConfigCallback(
+                    requestConfigBuilder -> requestConfigBuilder.setSocketTimeout(configs.getSocketTimeout()));
+        }
+        builder.setHttpClientConfigCallback(httpAsyncClientBuilder -> {
+            setAuthenticatedRestClientBuilder(configs, httpAsyncClientBuilder);
+            return httpAsyncClientBuilder;
+        });
+        return builder;
     }
 
     private static void setAuthenticatedRestClientBuilder(EsConnectionProperties configs,
             HttpAsyncClientBuilder httpAsyncClientBuilder) {
-        if (configs.getAuthEnabled()) {
-            final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        if (configs.getUsername() != null && !configs.getUsername().isBlank()) {
+            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(configs.getUsername(), configs.getPassword()));
+                    new UsernamePasswordCredentials(configs.getUsername(),
+                            configs.getPassword() != null ? configs.getPassword() : ""));
             httpAsyncClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
     }
