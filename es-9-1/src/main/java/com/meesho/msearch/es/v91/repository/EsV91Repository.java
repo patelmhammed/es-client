@@ -2,7 +2,6 @@ package com.meesho.msearch.es.v91.repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.meesho.msearch.es.EsVersion;
 import com.meesho.msearch.es.client.EsClient;
 import com.meesho.msearch.es.client.EsClientInfo;
 import com.meesho.msearch.es.config.EsConnectionProperties;
@@ -13,7 +12,7 @@ import com.meesho.msearch.es.model.requests.EsSearchRequest;
 import com.meesho.msearch.es.model.requests.EsWriteRequest;
 import com.meesho.msearch.es.model.responses.EsSearchResponse;
 import com.meesho.msearch.es.model.responses.EsWriteResponse;
-import com.meesho.msearch.es.repository.EsVersionedRepository;
+import com.meesho.msearch.es.repository.EsRepository;
 import com.meesho.msearch.es.util.EsRetryUtils;
 import com.meesho.msearch.es.v91.config.EsV91Configuration;
 import com.meesho.msearch.es.v91.client.EsV91Client;
@@ -27,16 +26,11 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-public class EsV91Repository implements EsVersionedRepository {
+public class EsV91Repository implements EsRepository {
     private final com.meesho.msearch.es.config.EsRetryConfig retryConfig;
 
     public EsV91Repository(com.meesho.msearch.es.config.EsRetryConfig retryConfig) {
         this.retryConfig = retryConfig;
-    }
-
-    @Override
-    public EsVersion getVersion() {
-        return EsVersion.V9_1;
     }
 
     @Override

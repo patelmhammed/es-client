@@ -21,11 +21,11 @@ class EsRepositoryFactoryTest {
 
     @BeforeEach
     void setUp() {
-        EsVersionedRepository v8Repo = new TestVersionedRepository(EsVersion.V8_5);
-        EsVersionedRepository v7Repo = new TestVersionedRepository(EsVersion.V7);
+        EsRepository v8Repo = new TestRepository();
+        EsRepository v7Repo = new TestRepository();
         factory = new EsRepositoryFactory();
-        factory.registerRepository(v8Repo.getVersion(), v8Repo);
-        factory.registerRepository(v7Repo.getVersion(), v7Repo);
+        factory.registerRepository(EsVersion.V8_5, v8Repo);
+        factory.registerRepository(EsVersion.V7, v7Repo);
     }
 
     @Test
@@ -54,14 +54,7 @@ class EsRepositoryFactoryTest {
         });
     }
 
-    private static class TestVersionedRepository implements EsVersionedRepository {
-        private final EsVersion version;
-
-        TestVersionedRepository(EsVersion version) {
-            this.version = version;
-        }
-
-        @Override public EsVersion getVersion() { return version; }
+    private static class TestRepository implements EsRepository {
         @Override public EsClient createClient(EsConnectionProperties connectionProperties) { return new EsClient() { }; }
         @Override public CompletableFuture<EsSearchResponse> getDocuments(EsSearchRequest r, EsClientInfo c) { return CompletableFuture.completedFuture(null); }
         @Override public CompletableFuture<EsWriteResponse> indexBulkDocuments(EsWriteRequest r, EsClientInfo c) { return CompletableFuture.completedFuture(null); }
