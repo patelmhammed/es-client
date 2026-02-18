@@ -3,7 +3,9 @@ package com.meesho.msearch.es.v8.repository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.meesho.msearch.es.EsVersion;
+import com.meesho.msearch.es.client.EsClient;
 import com.meesho.msearch.es.client.EsClientInfo;
+import com.meesho.msearch.es.config.EsConnectionProperties;
 import com.meesho.msearch.es.config.EsRequestProperties;
 import com.meesho.msearch.es.constants.EsConstants;
 import com.meesho.msearch.es.model.EsRepositoryEntity;
@@ -13,6 +15,7 @@ import com.meesho.msearch.es.model.responses.EsSearchResponse;
 import com.meesho.msearch.es.model.responses.EsWriteResponse;
 import com.meesho.msearch.es.repository.EsVersionedRepository;
 import com.meesho.msearch.es.util.EsRetryUtils;
+import com.meesho.msearch.es.v8.config.EsV8Configuration;
 import com.meesho.msearch.es.v8.client.EsV8Client;
 import com.meesho.msearch.es.v8.repository.utils.EsV8WriteUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,11 @@ public class EsV8Repository implements EsVersionedRepository {
     @Override
     public EsVersion getVersion() {
         return EsVersion.V8_5;
+    }
+
+    @Override
+    public EsClient createClient(EsConnectionProperties connectionProperties) {
+        return EsV8Configuration.createClient(connectionProperties);
     }
 
     @Override

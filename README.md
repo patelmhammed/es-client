@@ -68,14 +68,14 @@ These are passed as `EsConnectionProperties` (from `es-common`).
 
 ## How to use it in your app
 
-1. **Register a client factory per version**  
-   At startup, for each ES version you support, register its factory with `EsClientManager` (see how **es-host-service** does it with `EsV8ClientFactoryRegistrar`, `EsV813ClientFactoryRegistrar`, `EsV91ClientFactoryRegistrar`).
+1. **Create and register repository per version at startup**  
+   Build the version repository (`EsV8Repository`, `EsV813Repository`, `EsV91Repository`) and register it in `EsRepositoryFactory`.
 
-2. **Create a client when you need it**  
-   Call `esClientManager.createClient(connectionProperties, version)`. You get an `EsClient` for that version.
+2. **Create the ES client from repository**  
+   For each enabled version, call `repository.createClient(connectionProperties)` and store the returned `EsClient` in your host service map.
 
-3. **Use the repository**  
-   Use `EsRepositoryFactory.getRepository(version)` to get an `EsRepository` and call `getDocuments(...)` for search or `indexBulkDocuments(...)` for indexing.
+3. **Use repository + client together**  
+   For each request, pick the repository from `EsRepositoryFactory.getRepository(version)` and pass the pre-created client through `EsClientInfo`.
 
 The **es-host-service** project is a small Spring Boot app that shows this full flow: config per version, registration, and search/index APIs.
 

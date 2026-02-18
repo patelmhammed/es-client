@@ -1,7 +1,9 @@
 package com.meesho.msearch.es.repository;
 
 import com.meesho.msearch.es.EsVersion;
+import com.meesho.msearch.es.client.EsClient;
 import com.meesho.msearch.es.client.EsClientInfo;
+import com.meesho.msearch.es.config.EsConnectionProperties;
 import com.meesho.msearch.es.model.requests.EsSearchRequest;
 import com.meesho.msearch.es.model.requests.EsWriteRequest;
 import com.meesho.msearch.es.model.responses.EsSearchResponse;
@@ -60,6 +62,7 @@ class EsRepositoryFactoryTest {
         }
 
         @Override public EsVersion getVersion() { return version; }
+        @Override public EsClient createClient(EsConnectionProperties connectionProperties) { return new EsClient() { }; }
         @Override public CompletableFuture<EsSearchResponse> getDocuments(EsSearchRequest r, EsClientInfo c) { return CompletableFuture.completedFuture(null); }
         @Override public CompletableFuture<EsWriteResponse> indexBulkDocuments(EsWriteRequest r, EsClientInfo c) { return CompletableFuture.completedFuture(null); }
     }
