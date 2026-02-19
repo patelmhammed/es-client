@@ -8,6 +8,8 @@ import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.TransportOptions;
 
+import java.io.IOException;
+
 public class EsV813Client extends ElasticsearchAsyncClient implements EsClient {
     public EsV813Client(ElasticsearchTransport transport) {
         super(transport);
@@ -15,5 +17,10 @@ public class EsV813Client extends ElasticsearchAsyncClient implements EsClient {
 
     public EsV813Client(ElasticsearchTransport transport, @Nullable TransportOptions transportOptions) {
         super(transport, transportOptions);
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.transport.close();
     }
 }

@@ -1,5 +1,10 @@
 package com.meesho.msearch.es.v813.repository;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.search.SourceConfig;
+import co.elastic.clients.util.ObjectBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.meesho.msearch.es.client.EsClient;
@@ -45,10 +50,7 @@ public class EsV813Repository implements EsRepository {
         int size = request.getLimit() == null ? 10 : request.getLimit();
         List<String> fields = request.getSearchFields() == null ? Collections.emptyList() : request.getSearchFields();
 
-        return client.search(s -> s
-                        .index(requestProperties.getIndexName())
-                        .size(size)
-                        .source(src -> fields.isEmpty() ? src : src.filter(f -> f.includes(fields))),
+        return client.search(s -> getSearchRequest(s, requestProperties.getIndexName(), size, fields),
                 JsonNode.class)
                 .thenApply(response -> {
                     List<EsRepositoryEntity> documents = response.hits().hits().stream().map(hit -> {
@@ -58,11 +60,34 @@ public class EsV813Repository implements EsRepository {
                         }
                         return EsRepositoryEntity.builder()
                                 .entityId(Objects.requireNonNullElse(hit.id(), ""))
+                                .metadata(sourceNode == null ? null : sourceNode.toString())
                                 .build();
                     }).toList();
                     long resultCount = response.hits().total() == null ? documents.size() : response.hits().total().value();
                     return EsSearchResponse.builder().documents(documents).resultCount(resultCount).build();
                 });
+    }
+
+    private static SearchRequest.Builder getSearchRequest(SearchRequest.Builder s, String indexName, Integer size, List<String> fields) {
+        BoolQuery.Builder boolBuilder = new BoolQuery.Builder();
+        boolBuilder.must(m -> m.matchAll(ma -> ma));
+
+        // Build Query object
+        Query query = new Query.Builder()
+                .bool(boolBuilder.build())
+                .build();
+
+        SearchRequest.Builder builder = s.index(indexName)
+                .size(size)
+                .source(getSource(fields))
+                .query(query);
+        return builder;
+    }
+
+    private static java.util.function.Function<SourceConfig.Builder, ObjectBuilder<SourceConfig>> getSource(
+            List<String> responseFields) {
+
+        return x -> x.filter(y -> y.includes(responseFields));
     }
 
     @Override

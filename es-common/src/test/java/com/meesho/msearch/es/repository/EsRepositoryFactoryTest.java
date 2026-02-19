@@ -11,6 +11,7 @@ import com.meesho.msearch.es.model.responses.EsWriteResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,7 +56,12 @@ class EsRepositoryFactoryTest {
     }
 
     private static class TestRepository implements EsRepository {
-        @Override public EsClient createClient(EsConnectionProperties connectionProperties) { return new EsClient() { }; }
+        @Override public EsClient createClient(EsConnectionProperties connectionProperties) { return new EsClient() {
+            @Override
+            public void close() throws IOException {
+
+            }
+        }; }
         @Override public CompletableFuture<EsSearchResponse> getDocuments(EsSearchRequest r, EsClientInfo c) { return CompletableFuture.completedFuture(null); }
         @Override public CompletableFuture<EsWriteResponse> indexBulkDocuments(EsWriteRequest r, EsClientInfo c) { return CompletableFuture.completedFuture(null); }
     }

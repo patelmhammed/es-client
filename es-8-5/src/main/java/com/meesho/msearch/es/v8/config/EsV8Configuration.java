@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class EsV8Configuration {
 
-    private static final String DEFAULT_SCHEME = "https";
+    private static final String DEFAULT_SCHEME = "http";
 
     public static EsV8Client createClient(EsConnectionProperties configs) {
         RestClientBuilder restClientBuilder = getRestClientBuilder(configs);
