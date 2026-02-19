@@ -45,6 +45,7 @@ public class EsV8Repository implements EsRepository {
 
     @Override
     public CompletableFuture<EsSearchResponse> getDocuments(EsSearchRequest request, EsClientInfo clientInfo) {
+        log.info("Search request routed to ES client version 8.5");
         EsRequestProperties requestProperties = clientInfo.getRequestProperties();
         EsV8Client client = (EsV8Client) clientInfo.getEsClient();
         int size = request.getLimit() == null ? 10 : request.getLimit();
@@ -92,6 +93,7 @@ public class EsV8Repository implements EsRepository {
 
     @Override
     public CompletableFuture<EsWriteResponse> indexBulkDocuments(EsWriteRequest request, EsClientInfo clientInfo) {
+        log.info("Write request routed to ES client version 8.5");
         EsRequestProperties requestProperties = clientInfo.getRequestProperties();
         EsV8Client client = (EsV8Client) clientInfo.getEsClient();
 
